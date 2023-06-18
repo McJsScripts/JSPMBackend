@@ -1,0 +1,42 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"target": "ES2016",
+		"module": "CommonJS",
+		"sourceMap": true,
+		"outDir": "./dist/lib/",
+		"declarationDir": "./dist/types/",
+		"declaration": true,
+		"declarationMap": true,
+		"rootDir": "./src",
+		"lib": ["ES5"],
+		"strict": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"pretty": true,
+		"diagnostics": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"checkJs": true,
+		"strictPropertyInitialization": true,
+		"newLine": "lf",
+		"importHelpers": true
+	},
+	"buildOptions": {
+	},
+	"exclude": [
+		"node_modules",
+		"**/*.spec.ts"
+	],
+	"include": [
+		"src/**/*.ts"
+	]
+}

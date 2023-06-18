@@ -1,0 +1,8 @@
+node_modules
+.vscode
+dist
+temp
+yarn-error.log
+.test.js
+coverage
+package-lock.json
