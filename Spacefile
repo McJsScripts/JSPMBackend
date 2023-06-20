@@ -1,0 +1,20 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: backend
+    src: ./
+    engine: nodejs16
+    primary: true
+    commands:
+      - pnpm build
+    include:
+      - dist
+    run: node ./dist/lib/index.js
+    dev: node .
+    presets:
+      env:
+        - name: GH_BOT_KEY
+          default: ""
+
+        - name: GH_BOT_SECRET
+          default: ""

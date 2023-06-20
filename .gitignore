@@ -6,3 +6,5 @@ yarn-error.log
 .test.js
 coverage
 package-lock.json
+*.pem
+.space

@@ -1,13 +1,12 @@
 {
 	"compilerOptions": {
 		"alwaysStrict": true,
-		"target": "ES2016",
-		"module": "CommonJS",
+		"target": "es2017",
+		"module": "node16",
 		"sourceMap": true,
 		"outDir": "./dist/lib/",
 		"declarationDir": "./dist/types/",
 		"declaration": true,
-		"declarationMap": true,
 		"rootDir": "./src",
 		"lib": ["ES5"],
 		"strict": true,
@@ -17,7 +16,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"pretty": true,
 		"diagnostics": true,
-		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
