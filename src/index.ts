@@ -1,3 +1,9 @@
+import fs from "fs";
+import path from "path";
+console.log(__dirname);
+console.log(fs.readdirSync(path.resolve(__dirname)))
+console.log(fs.readdirSync(path.resolve(__dirname, "../../")))
+
 import express, { Response } from "express";
 import AdmZip from "adm-zip";
 

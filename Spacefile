@@ -2,13 +2,17 @@
 v: 0
 micros:
   - name: backend
+    public: true
     src: ./
     engine: nodejs16
     primary: true
     commands:
+      - pnpm install
       - pnpm build
     include:
       - dist
+      - package.json
+      - node_modules
     run: node ./dist/lib/index.js
     dev: node .
     presets:

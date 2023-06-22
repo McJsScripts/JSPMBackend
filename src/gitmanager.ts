@@ -1,7 +1,7 @@
 import { App, createNodeMiddleware } from "@octokit/app";
 import { isPackageNameValid } from "./schemas";
 
-const GH_BOT_KEY = process.env.GH_BOT_KEY!;
+const GH_BOT_KEY = Buffer.from(process.env.GH_BOT_KEY!, "base64").toString();
 const GH_BOT_SECRET = process.env.GH_BOT_SECRET!;
 
 const REPOSITORY_NAME = "JSPMRegistry";

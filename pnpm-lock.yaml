@@ -17,9 +17,6 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
-  tslib:
-    specifier: ^2.5.3
-    version: 2.5.3
   undici:
     specifier: ^5.22.1
     version: 5.22.1
@@ -1078,10 +1075,6 @@ packages:
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
-    dev: false
-
-  /tslib@2.5.3:
-    resolution: {integrity: sha512-mSxlJJwl3BMEQCUNnxXBU9jP4JBktcEGhURcPR6VQVlnP0FdDEsIaz0C35dXNGLyRfrATNofF0F5p2KPxQgB+w==}
     dev: false
 
   /type-is@1.6.18:
