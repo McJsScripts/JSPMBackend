@@ -16,6 +16,10 @@ function hashBase64(s: string) {
 	return createHash("sha256").update(`${s}`).digest("base64");
 }
 
+export function hash2Nonces(nonce1: string, nonce2: string) {
+	return hashBase64(`${nonce1}+${nonce2}`);
+}
+
 export async function putNonce(uuid: string) {
 	const check = await getNonce(uuid);
 	if (check) return { nonce: check };

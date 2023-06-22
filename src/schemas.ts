@@ -1,5 +1,6 @@
 import z from "zod";
 import { request } from "undici";
+import { hash2Nonces } from "./dbmanager";
 
 export const BAD_NAME_REGEXP = /[^-_a-z ]+/;
 export const SEMVER_REGEXP = /^(?<MAJOR>0|(?:[1-9]\d*))\.(?<MINOR>0|(?:[1-9]\d*))\.(?<PATCH>0|(?:[1-9]\d*))(?:-(?<prerelease>(?:0|(?:[1-9A-Za-z-][0-9A-Za-z-]*))(?:\.(?:0|(?:[1-9A-Za-z-][0-9A-Za-z-]*)))*))?(?:\+(?<build>(?:0|(?:[1-9A-Za-z-][0-9A-Za-z-]*))(?:\.(?:0|(?:[1-9A-Za-z-][0-9A-Za-z-]*)))*))?$/;
@@ -15,10 +16,13 @@ export async function verifyMcUUID(uuid: string) {
 	return name;
 }
 
-export async function verifyNonce(username: string, nonce: string) {
-	const res = await (await request(`https://sessionserver.mojang.com/session/minecraft/hasJoined?username=${encodeURIComponent(username)}&serverId=${encodeURIComponent(nonce)}`)).body.text();
-	console.log(res);
-	if (typeof res !== "object") throw "Invalid nonce!";
+export async function verifyNonce(username: string, nonce1: string, nonce2: string) {
+	try {
+		const hash = hash2Nonces(nonce1, nonce2);
+		const res = await (await request(`https://sessionserver.mojang.com/session/minecraft/hasJoined?username=${encodeURIComponent(username)}&serverId=${encodeURIComponent(hash)}`)).body.text();
+			console.log(res);
+		if (typeof res !== "object") throw "Invalid nonce!";
+	} catch (e) { throw `${e}` }
 }
 
 export const jspmJsonSchema = z.object({

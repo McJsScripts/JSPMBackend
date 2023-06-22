@@ -78,11 +78,12 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 
 	app.post("/auth/puttoken/:uuid", async (req, res) => {
 		try {
-			const { nonce } = requestPutToken.parse(req.body);
-			if ((await getNonce(req.params.uuid)) !== nonce) throw "Invalid nonce!";
+			const { nonce: nonce2 } = requestPutToken.parse(req.body);
+			const nonce1 = await getNonce(req.params.uuid);
+			if (!nonce1) throw "no";
 			const username = await verifyMcUUID(req.params.uuid);
-			verifyNonce(username, nonce);
-			const { token, expireIn } = await putToken(req.params.uuid, nonce);
+			verifyNonce(username, nonce1, nonce2);
+			const { token, expireIn } = await putToken(req.params.uuid, nonce2);
 			sendResponse<AuthPutTokenResponse<true>>(res, {
 				success: true, token, expireIn
 			});
