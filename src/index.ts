@@ -14,9 +14,11 @@ import { getNonce, getToken, putNonce, putToken } from "./dbmanager";
 
 const app = express();
 app.use(express.raw({
-	type: "text/plain"
+	limit: "5000kb", verify(req) {
+		req.setEncoding("binary");
+	},
 }));
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(async (req, res, next) =>  githubMiddleware(req, res, next));
 
@@ -50,7 +52,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.post("/pkg/:name", async (req, res) => {
-		console.log("POST pkg", req.params.name, req.headers.authorization);
+		console.log("POST pkg", req.params.name, req.headers.authorization, req.body.toString("base64"));
 		try {
 			const token = req.headers.authorization;
 			if (!token) throw "Missing authorization header!";

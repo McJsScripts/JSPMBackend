@@ -7,7 +7,6 @@ micros:
     engine: nodejs16
     primary: true
     commands:
-      - pnpm install
       - pnpm build
     include:
       - dist
