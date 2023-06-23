@@ -17,7 +17,7 @@ function hashBase64(s: string) {
 }
 
 export function hash2Nonces(nonce1: string, nonce2: string) {
-	return hashHex(`${nonce1}+${nonce2}`);
+	return hashHex(`${nonce1}+${nonce2}`).substring(0, 40);
 }
 
 export async function putNonce(uuid: string) {
