@@ -67,6 +67,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				success: true, githubUrl: `https://github.com/McJsScripts/JSPMRegistry/packages/${name}/`
 			});
 		} catch (e) {
+			console.log("failed", e);
 			sendResponse<PKGPublishAPIResponse<false>>(res, `${e}`);
 		}
 	});
@@ -80,6 +81,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				success: true, nonce, username, expireIn
 			});
 		} catch (e) {
+			console.log("failed", e);
 			sendResponse<AuthGetNonceResponse<false>>(res, `${e}`);
 		}
 	});
@@ -97,6 +99,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				success: true, token, expireIn
 			});
 		} catch (e) {
+			console.log("failed", e);
 			sendResponse<AuthPutTokenResponse<false>>(res, `${e}`);
 		}
 	});
