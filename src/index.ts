@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(async (req, res, next) =>  githubMiddleware(req, res, next));
 
 function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(res: Response, objOrError: T["success"] extends false ? string : T) {
-	res.send(typeof objOrError === "string" ? { success: false, error: objOrError } : objOrError);
+	res.send(typeof objOrError === "string" ? { success: false, error: `${objOrError}` } : objOrError);
 }
 
 (async()=>{
@@ -50,6 +50,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.post("/pkg/:name", async (req, res) => {
+		console.log("POST pkg", req.params.name, req.headers.authorization);
 		try {
 			const token = req.headers.authorization;
 			if (!token) throw "Missing authorization header!";
@@ -71,6 +72,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.get("/auth/getnonce/:uuid", async (req, res) => {
+		console.log("getnonce", req.params.uuid);
 		try {
 			const username = await verifyMcUUID(req.params.uuid);
 			const { nonce, expireIn } = await putNonce(req.params.uuid);
@@ -83,6 +85,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.post("/auth/puttoken/:uuid", async (req, res) => {
+		console.log("puttoken", req.params.uuid, req.body);
 		try {
 			const { nonce: nonce2 } = requestPutToken.parse(req.body);
 			const nonce1 = await getNonce(req.params.uuid);
