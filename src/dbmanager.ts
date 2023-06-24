@@ -45,6 +45,6 @@ export async function putToken(uuid: string, nonce: string) {
 }
 
 export async function getToken(uuid: string) {
-	const nonce = await tokendb.get(`TOKEN ${uuid}`);
-	return nonce?.value as string;;
+	const token = await tokendb.get(`TOKEN ${uuid}`);
+	return token?.value as string;;
 }

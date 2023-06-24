@@ -34,7 +34,7 @@ const app = new App({
 const manager = (async()=>{for await (const { installation } of app.eachInstallation.iterator()) for await (const { octokit, repository } of app.eachRepository.iterator({ installationId: installation.id })) {
 	console.log(`found ${repository.full_name}`);
 	if (repository.full_name !== `${OWNER_NAME}/${REPOSITORY_NAME}`) continue;
-	return {
+	const obj = {
 		checkRepo: async () => {
 			const { data } = await octokit.request(`GET ${CONTENTS_URL}`, {
 				owner: OWNER_NAME, repo: REPOSITORY_NAME, path: PACKAGES_PATH
@@ -58,9 +58,10 @@ const manager = (async()=>{for await (const { installation } of app.eachInstalla
 			if (Array.isArray(data) || data.type !== "file") return null;
 			return { content: data.content, url: data.url }
 		},
-		uploadPackage: async (name: string, files: { path: string, content: Buffer}[]) => {
+		uploadPackage: async (name: string, update: boolean, files: { path: string, content: Buffer}[]) => {
 			if (!isPackageNameValid(name)) return null;
 			try {
+				if (!update) if ((await obj.checkRepo())?.packageNames.includes(name)) throw "Package already exists!";
 				const { data: { commit: { sha: lastCommitSha } } } = await octokit.request(`GET ${MASTER_BRANCH_URL}`, {
 					owner: OWNER_NAME, repo: REPOSITORY_NAME, branch: "master"
 				});
@@ -77,7 +78,7 @@ const manager = (async()=>{for await (const { installation } of app.eachInstalla
 					})),
 				});
 				const {  data: { sha: newCommitSha } } = await octokit.request(`POST ${GIT_COMMITS_URL}`, {
-					owner: OWNER_NAME, repo: REPOSITORY_NAME, tree: treeSha, parents: [lastCommitSha], message: `(JSPM): upload new pkg "${name}"`
+					owner: OWNER_NAME, repo: REPOSITORY_NAME, tree: treeSha, parents: [lastCommitSha], message: `(JSPM): ${!update ? `upload new pkg "${name}"` : `update pkg "${name}"`}`
 				});
 				await octokit.request("PATCH /repos/{owner}/{repo}/git/refs/heads/{branch}", {
 					owner: OWNER_NAME, repo: REPOSITORY_NAME, sha: newCommitSha, branch: "master"
@@ -87,6 +88,7 @@ const manager = (async()=>{for await (const { installation } of app.eachInstalla
 			}
 		}
 	} as const;
+	return obj;
 }})();
 export default manager;
 

@@ -27,7 +27,7 @@ export async function verifyNonce(username: string, nonce1: string, nonce2: stri
 
 export const jspmJsonSchema = z.object({
 	author: z.object({
-		name: z.string({ invalid_type_error: "`author.name` must be string!" }).optional(),
+		name: z.string({ invalid_type_error: "`author.name` must be string!" }),
 		uuid: z.string({ required_error: "Missing `author.uuid`!" }).uuid()
 	}),
 	version: z.object({

@@ -1,14 +1,10 @@
-import fs from "fs";
-import path from "path";
-console.log(__dirname);
-console.log(fs.readdirSync(path.resolve(__dirname)))
-console.log(fs.readdirSync(path.resolve(__dirname, "../../")))
-
 import express, { Response } from "express";
 import AdmZip from "adm-zip";
+import checkSemver from "semver/functions/gt";
+import validateSemver from "semver/functions/valid";
 
 import { APIResponseBody, AuthGetNonceResponse, AuthPutTokenResponse, CheckAPIResponse, PKGGetMetadataResponse, PKGPublishAPIResponse } from "./apiresponse";
-import promiseGitmanager, { githubMiddleware, isManagerReady } from "./gitmanager";
+import promiseGitmanager, { PACKAGE_CONFIG_FILE, githubMiddleware, isManagerReady } from "./gitmanager";
 import { isPackageNameValid, jspmJsonSchema, requestGetPKGMetadata, requestPutToken, verifyMcUUID, verifyNonce } from "./schemas";
 import { getNonce, getToken, putNonce, putToken } from "./dbmanager";
 
@@ -52,30 +48,51 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.post("/pkg/:name", async (req, res) => {
-		console.log("POST pkg", req.params.name, req.headers.authorization, req.body.toString("base64"));
+		console.log("(POST pkg)", req.params.name, req.headers.authorization, req.body.toString("base64"));
 		try {
 			const token = req.headers.authorization;
 			if (!token) throw "Missing authorization header!";
 			const name = req.params.name;
+
 			if (!isPackageNameValid(name)) throw "Invalid name!";
 			if (!Buffer.isBuffer(req.body)) throw "Request body must be a zip file!";
 			const zip = new AdmZip(req.body);
-			const cfg = jspmJsonSchema.parse(JSON.parse(zip.readAsText("jspm.json")));
+
+			const cfg = jspmJsonSchema.parse(JSON.parse(zip.readAsText(PACKAGE_CONFIG_FILE)));
+			if ((await verifyMcUUID(cfg.author.uuid)) !== cfg.author.name) throw "Invalid uuid!";
 			if ((await getToken(cfg.author.uuid)) !== token) throw "Invalid token!";
+			if (!validateSemver(cfg.version.pkg)) throw "Invalid package semver!";
+
+			let update = false;
+
+			const gitCheck = await gitmanager.checkRepo();
+			if (!gitCheck) throw "Something went wrong (checkRepo failed)";
+			if (gitCheck.packageNames.includes(name)) {
+				const pkgCheck = await gitmanager.getPackageMetadata(name);
+				if (!pkgCheck) throw "Something went wrong (couldn't fetch pkg metadata)";
+				const cfgCheck = jspmJsonSchema.parse(JSON.parse(Buffer.from(pkgCheck.content, "base64").toString()));
+				if ((await verifyMcUUID(cfgCheck.author.uuid)) !== cfg.author.name || (await getToken(cfgCheck.author.uuid)) !== token) throw "Unauthorized. Only the package publisher is able to update the package!";
+
+				const gt = checkSemver(cfgCheck.version.pkg, cfg.version.pkg); // greather than
+				if (!gt) throw "Downgrading a package `version.pkg` is not allowed!";
+
+				update = true;
+			}
+
 			if (!zip.getEntries().find(entry => entry.name === "index.js")) throw "Missing index.js file at root of package";
 			const files = zip.getEntries().map(entry => ({ path: entry.entryName, content: entry.getData() }))
-			await gitmanager.uploadPackage(name, files);
+			await gitmanager.uploadPackage(name, update, files);
 			sendResponse<PKGPublishAPIResponse<true>>(res, {
 				success: true, githubUrl: `https://github.com/McJsScripts/JSPMRegistry/packages/${name}/`
 			});
 		} catch (e) {
-			console.log("failed", e);
+			console.log("(failed)", req.params.name, e);
 			sendResponse<PKGPublishAPIResponse<false>>(res, `${e}`);
 		}
 	});
 
 	app.get("/auth/getnonce/:uuid", async (req, res) => {
-		console.log("getnonce", req.params.uuid);
+		console.log("(getnonce)", req.params.uuid);
 		try {
 			const username = await verifyMcUUID(req.params.uuid);
 			const { nonce, expireIn } = await putNonce(req.params.uuid);
@@ -83,13 +100,13 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				success: true, nonce, username, expireIn
 			});
 		} catch (e) {
-			console.log("failed", e);
+			console.log("(failed)", req.params.uuid, e);
 			sendResponse<AuthGetNonceResponse<false>>(res, `${e}`);
 		}
 	});
 
 	app.post("/auth/puttoken/:uuid", async (req, res) => {
-		console.log("puttoken", req.params.uuid, req.body);
+		console.log("(puttoken)", req.params.uuid, req.body);
 		try {
 			const { nonce: nonce2 } = requestPutToken.parse(req.body);
 			const nonce1 = await getNonce(req.params.uuid);
@@ -101,7 +118,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				success: true, token, expireIn
 			});
 		} catch (e) {
-			console.log("failed", e);
+			console.log("(failed)", req.params.uuid, e);
 			sendResponse<AuthPutTokenResponse<false>>(res, `${e}`);
 		}
 	});
