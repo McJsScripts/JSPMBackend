@@ -37,6 +37,7 @@ export const jspmJsonSchema = z.object({
 	}),
 	displayName: z.string().optional(),
 	description: z.string().optional(),
+	tags: z.array(z.string()).optional(),
 });
 
 export const requestGetPKGMetadata = z.object({
