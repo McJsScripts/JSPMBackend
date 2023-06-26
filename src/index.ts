@@ -61,6 +61,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 			const zip = new AdmZip(req.body);
 
 			const cfg = jspmJsonSchema.parse(JSON.parse(zip.readAsText(PACKAGE_CONFIG_FILE)));
+			if (cfg.private) throw "`private` is true!";
 			if ((await verifyMcUUID(cfg.author.uuid)) !== cfg.author.name) throw "Invalid uuid!";
 			if ((await getToken(cfg.author.uuid)) !== token) throw "Invalid token!";
 			if (!validateSemver(cfg.version.pkg)) throw "Invalid package semver!";

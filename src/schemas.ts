@@ -27,14 +27,15 @@ export async function verifyNonce(username: string, nonce1: string, nonce2: stri
 
 export const jspmJsonSchema = z.object({
 	author: z.object({
-		name: z.string({ invalid_type_error: "`author.name` must be string!" }),
+		name: z.string({ required_error: "Missing `author.name`!" }),
 		uuid: z.string({ required_error: "Missing `author.uuid`!" }).uuid()
 	}),
 	version: z.object({
 		pkg: z.string({ required_error: "Missing `version.pkg`!" }).regex(SEMVER_REGEXP, "`pkg.version` must be a semantic version!"),
-		minecraft: z.string({ required_error: "Missing `version.minecraft`" }),
+		minecraft: z.string({ required_error: "Missing `version.minecraft`!" }),
 		jsscripts: z.string().optional(),
 	}),
+	private: z.boolean().optional(),
 	displayName: z.string().optional(),
 	description: z.string().optional(),
 	tags: z.array(z.string()).optional(),
