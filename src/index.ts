@@ -1,4 +1,5 @@
 import express, { Response } from "express";
+import cors from "cors";
 import AdmZip from "adm-zip";
 import checkSemver from "semver/functions/gt";
 import validateSemver from "semver/functions/valid";
@@ -9,6 +10,7 @@ import { isPackageNameValid, jspmJsonSchema, requestGetPKGMetadata, requestPutTo
 import { getNonce, getToken, putNonce, putToken } from "./dbmanager";
 
 const app = express();
+app.use(cors());
 app.use(express.raw({
 	limit: "5000kb", verify(req) {
 		req.setEncoding("binary");
