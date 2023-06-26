@@ -73,7 +73,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				const cfgCheck = jspmJsonSchema.parse(JSON.parse(Buffer.from(pkgCheck.content, "base64").toString()));
 				if ((await verifyMcUUID(cfgCheck.author.uuid)) !== cfg.author.name || (await getToken(cfgCheck.author.uuid)) !== token) throw "Unauthorized. Only the package publisher is able to update the package!";
 
-				const gt = checkSemver(cfgCheck.version.pkg, cfg.version.pkg); // greather than
+				const gt = checkSemver(cfg.version.pkg, cfgCheck.version.pkg); // greather than
 				if (!gt) throw "Downgrading a package `version.pkg` is not allowed!";
 
 				update = true;
