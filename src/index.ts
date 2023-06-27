@@ -19,7 +19,9 @@ app.use(express.raw({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(rateLimiter.default());
+app.use(rateLimiter.default({
+	message: { success: false, error: "Too many requests!" },
+}));
 app.use(async (req, res, next) =>  githubMiddleware(req, res, next));
 
 function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(res: Response, objOrError: T["success"] extends false ? string : T) {
