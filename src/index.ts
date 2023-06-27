@@ -19,8 +19,8 @@ app.use(express.raw({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(;
 app.use(async (req, res, next) =>  githubMiddleware(req, res, next));
+const RATE_LIMIT_MAX = 2;
 
 function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(res: Response, objOrError: T["success"] extends false ? string : T) {
 	res.send(typeof objOrError === "string" ? { success: false, error: `${objOrError}` } : objOrError);
@@ -51,7 +51,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 		}
 	});
 
-	app.post("/pkg/:name", rateLimiter.default({ message: { success: false, error: "Too many requests!" } }), async (req, res) => {
+	app.post("/pkg/:name", rateLimiter.default({ message: { success: false, error: "Too many requests!" }, windowMs: RATE_LIMIT_MAX }), async (req, res) => {
 		console.log("(POST pkg)", req.params.name, req.headers.authorization, req.body.toString("base64"));
 		try {
 			const blacklist = await gitmanager.getBlacklist();
