@@ -12,6 +12,7 @@ const GIT_BLOBS_URL = "/repos/{owner}/{repo}/git/blobs";
 const GIT_TREE_URL = "/repos/{owner}/{repo}/git/trees";
 const GIT_COMMITS_URL = "/repos/{owner}/{repo}/git/commits";
 
+export const BLACKLIST_FILE = "BLACKLIST";
 export const PACKAGES_PATH = "packages";
 export const PACKAGE_CONFIG_FILE = "jspm.json";
 export const PACKAGE_ENTRY__FILE = "index.js";
@@ -86,6 +87,14 @@ const manager = (async()=>{for await (const { installation } of app.eachInstalla
 			} catch (e) {
 				return new Error(`${e}`);
 			}
+		},
+		getBlacklist: async () => {
+			const { data } = await octokit.request(`GET ${CONTENTS_URL}`, {
+				owner: OWNER_NAME, repo: REPOSITORY_NAME, path: `${BLACKLIST_FILE}`
+			});
+			if (Array.isArray(data) || data.type !== "file") return [];
+			const contents: string[] = JSON.parse(data.content);
+			return contents;
 		}
 	} as const;
 	return obj;

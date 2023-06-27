@@ -8,6 +8,7 @@ import { APIResponseBody, AuthGetNonceResponse, AuthPutTokenResponse, CheckAPIRe
 import promiseGitmanager, { PACKAGE_CONFIG_FILE, githubMiddleware, isManagerReady } from "./gitmanager";
 import { isPackageNameValid, jspmJsonSchema, requestGetPKGMetadata, requestPutToken, verifyMcUUID, verifyNonce } from "./schemas";
 import { getNonce, getToken, putNonce, putToken } from "./dbmanager";
+const rateLimiter = require("express-rate-limit");
 
 const app = express();
 app.use(cors());
@@ -18,6 +19,7 @@ app.use(express.raw({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(rateLimiter.default());
 app.use(async (req, res, next) =>  githubMiddleware(req, res, next));
 
 function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(res: Response, objOrError: T["success"] extends false ? string : T) {
@@ -52,6 +54,8 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	app.post("/pkg/:name", async (req, res) => {
 		console.log("(POST pkg)", req.params.name, req.headers.authorization, req.body.toString("base64"));
 		try {
+			const blacklist = await gitmanager.getBlacklist();
+
 			const token = req.headers.authorization;
 			if (!token) throw "Missing authorization header!";
 			const name = req.params.name;
@@ -61,6 +65,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 			const zip = new AdmZip(req.body);
 
 			const cfg = jspmJsonSchema.parse(JSON.parse(zip.readAsText(PACKAGE_CONFIG_FILE)));
+			if (blacklist.includes(cfg.author.uuid)) throw "Unauthorized. You'be been blacklisted!";
 			if (cfg.private) throw "`private` is true!";
 			if ((await verifyMcUUID(cfg.author.uuid)) !== cfg.author.name) throw "Invalid uuid!";
 			if ((await getToken(cfg.author.uuid)) !== token) throw "Invalid token!";
