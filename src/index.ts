@@ -68,7 +68,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 			if (blacklist.includes(cfg.author.uuid)) throw "Unauthorized. You'be been blacklisted!";
 			if (cfg.private) throw "`private` is true!";
 			if ((await verifyMcUUID(cfg.author.uuid)) !== cfg.author.name) throw "Invalid uuid!";
-			if ((await getToken(cfg.author.uuid)) !== token) throw "Invalid token!";
+			if ((await getToken(cfg.author.uuid))?.value !== token) throw "Invalid token!";
 			if (!validateSemver(cfg.version.pkg)) throw "Invalid package semver!";
 
 			let update = false;
@@ -79,7 +79,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 				const pkgCheck = await gitmanager.getPackageMetadata(name);
 				if (!pkgCheck) throw "Something went wrong (couldn't fetch pkg metadata)";
 				const cfgCheck = jspmJsonSchema.parse(JSON.parse(Buffer.from(pkgCheck.content, "base64").toString()));
-				if ((await verifyMcUUID(cfgCheck.author.uuid)) !== cfg.author.name || (await getToken(cfgCheck.author.uuid)) !== token) throw "Unauthorized. Only the package publisher is able to update the package!";
+				if ((await verifyMcUUID(cfgCheck.author.uuid)) !== cfg.author.name || (await getToken(cfgCheck.author.uuid))?.value !== token) throw "Unauthorized. Only the package publisher is able to update the package!";
 
 				const gt = checkSemver(cfg.version.pkg, cfgCheck.version.pkg); // greather than
 				if (!gt) throw "Downgrading a package `version.pkg` is not allowed!";
@@ -100,7 +100,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.get("/auth/getnonce/:uuid", async (req, res) => {
-		console.log("(getnonce)", req.params.uuid);
+		console.log("(GET getnonce)", req.params.uuid);
 		try {
 			const username = await verifyMcUUID(req.params.uuid);
 			const { nonce, expireIn } = await putNonce(req.params.uuid);
@@ -114,13 +114,13 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 	});
 
 	app.post("/auth/puttoken/:uuid", async (req, res) => {
-		console.log("(puttoken)", req.params.uuid, req.body);
+		console.log("(POST puttoken)", req.params.uuid, req.body);
 		try {
 			const { nonce: nonce2 } = requestPutToken.parse(req.body);
 			const nonce1 = await getNonce(req.params.uuid);
-			if (!nonce1) throw "no";
+			if (!nonce1?.value) throw "no";
 			const username = await verifyMcUUID(req.params.uuid);
-			verifyNonce(username, nonce1, nonce2);
+			verifyNonce(username, nonce1.value, nonce2);
 			const { token, expireIn } = await putToken(req.params.uuid, nonce2);
 			sendResponse<AuthPutTokenResponse<true>>(res, {
 				success: true, token, expireIn
