@@ -1,0 +1,20 @@
+name: Deploy
+
+on: 
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    name: Deploy to Deta Space
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Deploy
+      uses: lizheming/deta-action@master
+      with:
+        access_token: ${{ secrets.SPACE_ACCESS_TOKEN }}
+        id: ${{ secrets.SPACE_ID }}

@@ -31,8 +31,12 @@ export async function putNonce(uuid: string) {
 }
 
 export async function getNonce(uuid: string) {
-	const { value, __expires } = await noncedb.get(`AUTH ${uuid}`)! as { __expires: number, value: string };
-	return { value, expireIn: __expires };
+	const nonce = await noncedb.get(`AUTH ${uuid}`) as { __expires: number, value: string } | null;
+	if (!nonce) return null;
+	return {
+		value: nonce.value,
+		expireIn: nonce.__expires
+	};
 }
 
 export async function putToken(uuid: string, nonce: string) {
@@ -45,6 +49,10 @@ export async function putToken(uuid: string, nonce: string) {
 }
 
 export async function getToken(uuid: string) {
-	const { value, __expires } = await tokendb.get(`TOKEN ${uuid}`)! as { __expires: number, value: string };
-	return { value, expireIn: __expires };
+	const token = await tokendb.get(`TOKEN ${uuid}`) as { __expires: number, value: string } | null;
+	if (!token) return null;
+	return {
+		value: token.value,
+		expireIn: token.__expires
+	};
 }
