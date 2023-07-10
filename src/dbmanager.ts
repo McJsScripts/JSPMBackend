@@ -1,6 +1,6 @@
-import { Deta } from "deta";
 import { createHash } from "crypto";
-const deta = Deta(process.env.DETA_PROJECT_KEY, process.env.DETA_ACCESS_TOKEN);
+import { Deta } from "deta";
+const deta = Deta(process.env.DETA_COLLECTIONS_KEY);
 
 const noncedb = deta.Base("noncedb");
 const tokendb = deta.Base("logindb");
