@@ -65,7 +65,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 			const zip = new AdmZip(req.body);
 
 			const cfg = jspmJsonSchema.parse(JSON.parse(zip.readAsText(PACKAGE_CONFIG_FILE)));
-			if (blacklist.includes(cfg.author.uuid)) throw "Unauthorized. You'be been blacklisted!";
+			if (blacklist.includes(cfg.author.uuid)) throw "Unauthorized!";
 			if (cfg.private) throw "`private` is true!";
 			if ((await verifyMcUUID(cfg.author.uuid)) !== cfg.author.name) throw "Invalid uuid!";
 			if ((await getToken(cfg.author.uuid))?.value !== token) throw "Invalid token!";
