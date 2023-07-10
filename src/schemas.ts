@@ -19,10 +19,9 @@ export async function verifyMcUUID(uuid: string) {
 export async function verifyNonce(username: string, nonce1: string, nonce2: string) {
 	try {
 		const hash = hash2Nonces(nonce1, nonce2);
-		const res = await (await request(`https://sessionserver.mojang.com/session/minecraft/hasJoined?username=${encodeURIComponent(username)}&serverId=${encodeURIComponent(hash)}`)).body.text();
-			console.log(res);
-		if (typeof res !== "object") throw "Invalid nonce!";
-	} catch (e) { throw `${e}` }
+		const res = await (await request(`https://sessionserver.mojang.com/session/minecraft/hasJoined?username=${encodeURIComponent(username)}&serverId=${encodeURIComponent(hash)}`)).body.json();
+		if (typeof res !== "object") throw 0;
+	} catch (e) { throw `Invalid nonce!${!e ? "" : `(${e})`}` }
 }
 
 export const jspmJsonSchema = z.object({
