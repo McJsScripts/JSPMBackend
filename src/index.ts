@@ -120,7 +120,7 @@ function sendResponse<T extends APIResponseBody<boolean, Record<string, any>>>(r
 			const nonce1 = await getNonce(req.params.uuid);
 			if (!nonce1?.value) throw "no";
 			const username = await verifyMcUUID(req.params.uuid);
-			verifyNonce(username, nonce1.value, nonce2);
+			await verifyNonce(username, nonce1.value, nonce2);
 			const { token, expireIn } = await putToken(req.params.uuid, nonce2);
 			sendResponse<AuthPutTokenResponse<true>>(res, {
 				success: true, token, expireIn
